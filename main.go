@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	"github.com/rauldotgit/wowauction/handlers"
 )
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 	// create chi router
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedOrigins:   []string{"https://*", "http://*", "http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{"Link"},
@@ -32,11 +33,13 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	// create another router instance for version
+	// new version router
 	v1Router := chi.NewRouter()
-	// v1Router.HandleFunc("/ok", )
 
-	// mount the version router onto the main router
+	// add request handlers
+	v1Router.Get("/ok", handlers.HandleOK)
+
+	// add the sub router into the top router
 	router.Mount("/v1", v1Router)
 
 	server := &http.Server{
