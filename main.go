@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/rauldotgit/wowauction/handlers"
+	"github.com/rauldotgit/wowauction/utils"
 )
 
 func main() {
@@ -41,6 +42,9 @@ func main() {
 
 	// add the sub router into the top router
 	router.Mount("/v1", v1Router)
+
+	// local execution for testing
+	go utils.LocalExec()
 
 	server := &http.Server{
 		Handler: router,
