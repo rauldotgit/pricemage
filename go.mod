@@ -1,4 +1,4 @@
-module github.com/rauldotgit/wowauction
+module github.com/rauldotgit/pricemage
 
 go 1.22.0
 

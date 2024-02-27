@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/rauldotgit/wowauction/utils"
+	"github.com/rauldotgit/pricemage/utils"
 )
 
 // classic handler structure with http.ResponseWriter and a pointer to the request
