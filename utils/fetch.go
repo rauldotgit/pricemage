@@ -2,60 +2,48 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
-func fetch(url string, method string, reqBody io.Reader, client *http.Client) ([]byte, error) {
+func Fetch(url string, method string, reqBody io.Reader, client *http.Client, authToken *string) ([]byte, error) {
 
-	var reqMethod string
-	errMsg := "Error in FetchTSMAuth: "
-
-	switch method {
-	case http.MethodGet:
-		reqMethod = http.MethodGet
-	case http.MethodPost:
-		reqMethod = http.MethodPost
-	case http.MethodDelete:
-		reqMethod = http.MethodDelete
-	case http.MethodPut:
-		reqMethod = http.MethodPut
-	case http.MethodOptions:
-		reqMethod = http.MethodOptions
-	default:
-		return []byte{}, errors.New(errMsg + "invalid method string.")
-	}
-
-	req, err := http.NewRequest(reqMethod, url, reqBody)
+	req, err := http.NewRequest(method, url, reqBody)
 	if err != nil {
-		return []byte{}, errors.New(errMsg + "failed to create request.")
+		return []byte{}, fmt.Errorf("error in fetch: %w", err)
 	}
 
-	// set request header
-	req.Header.Set("Content-Type", "application/json")
+	if authToken != nil {
+		req.Header.Set("Authorization", "Bearer "+*authToken)
+	} else {
+		req.Header.Set("cache-control", "no-cache")
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", "----boundary"))
+		req.SetBasicAuth(os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"))
+	}
 
 	// make request
 	res, err := client.Do(req)
 	if err != nil {
-		return []byte{}, errors.New(errMsg + "failed to make request.")
+		return []byte{}, fmt.Errorf("error in Fetch: %w", err)
 	}
 
 	// close response body i.e. signal to server finish
 	defer res.Body.Close()
 
-	log.Println(res)
-
 	// check status code
 	if res.StatusCode > 299 {
-		return []byte{}, errors.New(errMsg + "unexpected status code - " + strconv.Itoa(res.StatusCode))
+		log.Println(res)
+		return []byte{}, errors.New("error in Fetch: unexpected status code - " + strconv.Itoa(res.StatusCode))
 	}
 
 	// read response body
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return []byte{}, errors.New(errMsg + "failed to read response body.")
+		return []byte{}, fmt.Errorf("error in Fetch: %w", err)
 	}
 
 	return resBody, nil

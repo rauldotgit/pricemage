@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/rauldotgit/pricemage/handlers"
-	"github.com/rauldotgit/pricemage/utils"
+	"github.com/rauldotgit/pricemage/logic"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	router.Mount("/v1", v1Router)
 
 	// local execution for testing
-	go utils.LocalExec()
+	go logic.LocalExec()
 
 	server := &http.Server{
 		Handler: router,
